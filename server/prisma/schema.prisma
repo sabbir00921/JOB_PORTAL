@@ -1,0 +1,240 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
+enum Role {
+  admin
+  jobSeeker
+  recruiter
+}
+
+enum AccountStatus {
+  active
+  inactive
+  suspended
+  banned
+  flagged
+}
+
+
+//user model
+model User {
+  id String @id @default(uuid())
+  firstName String
+  lastName String
+  email String @unique
+  phone String @unique
+  password String
+  role Role @default(jobSeeker)
+  isVerified Boolean @default(false)
+  image Json?
+  status AccountStatus @default(active)
+  refreshToken String?
+  forgetPasswordOtp String?
+  forgetPasswordOtpExpiry DateTime?
+  forgetPasswordToken String?
+  forgetPasswordTokenExpiry DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("users")
+
+  //relations
+  jobSeeker JobSeeker?
+  recruiter Recruiter?
+  notifications Notification[]
+}
+
+//job seeker model
+model JobSeeker {
+  id String @id @default(uuid())
+  userId String @unique
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  resume Json?
+  coverLetter String?
+  skills String[]
+  experience Int?
+  education String?
+  bio String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("jobSeekers")
+
+  //relations
+  applications Application[]
+  savedJobs    SavedJob[]
+}
+
+//recruiter model
+model Recruiter {
+  id String @id @default(uuid())
+  userId String @unique
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyName String
+  companyLogo Json?
+  companyDescription String?
+  companyLocation String?
+  companyWebsite String?
+  companySize String?
+  companyIndustry String?
+  companyHeadquarters String?
+  companyFoundedYear Int?
+  companySocialLinks Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("recruiters")
+  //relations
+  jobs Job[]
+}
+
+
+enum JobType {
+  fullTime
+  partTime
+  contract
+  temporary
+  internship
+}
+
+enum ExperienceLevel {
+  entryLevel
+  midLevel
+  seniorLevel
+  leadLevel
+  executiveLevel
+}
+//job model
+model Job {
+  id String @id @default(uuid())
+  recruiterId String
+  recruiter Recruiter @relation(fields: [recruiterId], references: [id], onDelete: Cascade)
+  title String
+  description String
+  responsibilities String[]
+  qualifications String[]
+  salary String?
+  location String?
+  jobType JobType @default(fullTime)
+  experienceLevel ExperienceLevel @default(entryLevel)
+  skills String[]
+  benefits String[]
+  applicationDeadline DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("jobs")
+
+  //relations
+  applications Application[]
+  savedJobs SavedJob[]
+}
+
+
+//application model
+enum ApplicationStatus {
+  pending
+  review
+  shortlisted
+  interview
+  offered
+  rejected
+  withdrawn
+}
+
+model Application {
+  id String @id @default(uuid())
+  jobId String
+  job Job @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  jobSeekerId String
+  jobSeeker JobSeeker @relation(fields: [jobSeekerId], references: [id], onDelete: Cascade)
+  status ApplicationStatus @default(pending)
+  coverLetter String?
+  resume Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("applications")
+
+  //relations
+  interviews Interview[]
+  offers Offer[]
+}
+  
+  //saved jobs model
+  model SavedJob {
+    id String @id @default(uuid())
+    jobId String
+    job Job @relation(fields: [jobId], references: [id], onDelete: Cascade)
+    jobSeekerId String
+    jobSeeker JobSeeker @relation(fields: [jobSeekerId], references: [id], onDelete: Cascade)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    @@map("savedJobs")
+  }
+
+//notification model
+enum NotificationType {
+  application
+  interview
+  offer
+  rejection
+  other
+}
+
+model Notification {
+  id String @id @default(uuid())
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type NotificationType @default(other)
+  message String
+  isRead Boolean @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("notifications")
+}
+
+
+//interview model
+enum InterviewStatus {
+  pending
+  scheduled
+  completed
+  cancelled
+}
+
+model Interview {
+  id String @id @default(uuid())
+  applicationId String
+  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  interviewDate DateTime
+  interviewTime String
+  interviewLocation String
+  interviewStatus InterviewStatus @default(pending)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("interviews")
+}
+
+//offer model
+enum OfferStatus {
+  pending
+  accepted
+  rejected
+  withdrawn
+}
+
+model Offer {
+  id String @id @default(uuid())
+  applicationId String
+  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  offerDate DateTime
+  offerLetter String?
+  offerStatus OfferStatus @default(pending)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("offers")
+}
+
