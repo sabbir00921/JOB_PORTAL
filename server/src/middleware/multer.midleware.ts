@@ -52,6 +52,57 @@ export const upload = multer({
   fileFilter: imageFileFilter,
 });
 
+const pdfAndDocFileFilter = (
+  _req: Request,
+  file: Express.Multer.File,
+  cb: FileFilterCallback,
+) => {
+  const allowedTypes = [
+    "application/pdf",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  ];
+
+  if (!allowedTypes.includes(file.mimetype)) {
+    return cb(
+      new CustomError(400, "Invalid file type", [
+        { field: "file", message: "Only PDF and Word files are allowed" },
+      ]),
+    );
+  }
+  cb(null, true);
+};
+
+const resumeMulter = multer({
+  storage,
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
+  fileFilter: pdfAndDocFileFilter,
+});
+
+export const resumeUpload =
+  (fieldName: string) => (req: Request, res: Response, next: NextFunction) => {
+    const singleUpload = resumeMulter.single(fieldName);
+
+    singleUpload(req, res, (err) => {
+      if (err) {
+        if (err instanceof MulterError && err.code === "LIMIT_FILE_SIZE") {
+          return next(
+            new CustomError(400, "File too large. Maximum size is 10MB", [
+              {
+                field: fieldName,
+                message: "File too large. Maximum size is 10MB",
+              },
+            ]),
+          );
+        }
+
+        if (err instanceof CustomError) return next(err);
+        return next(new CustomError(400, err.message));
+      }
+      next();
+    });
+  };
+
 export const uploadSingle =
   (fieldName: string) => (req: Request, res: Response, next: NextFunction) => {
     const singleUpload = upload.single(fieldName);

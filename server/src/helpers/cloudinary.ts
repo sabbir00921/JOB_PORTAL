@@ -27,6 +27,9 @@ export const uploadCloudinary = async (
 
     fs.unlinkSync(filePath);
 
+    console.log(cloudinaryResponse,' cloudinaryResponse');
+    
+
     return {
       public_id: cloudinaryResponse.public_id,
       secure_url: cloudinaryResponse.secure_url

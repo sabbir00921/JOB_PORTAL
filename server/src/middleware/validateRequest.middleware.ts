@@ -6,11 +6,15 @@ export const validateRequest = (schema: ZodSchema): RequestHandler => {
   return async (req: Request, _res: Response, next: NextFunction) => {
 
     try {
-      await schema.parseAsync({
+      const parsed = await schema.parseAsync({
         body: req.body,
         query: req.query,
         params: req.params,
       });
+
+      req.body = (parsed as any).body;
+      Object.defineProperty(req, 'query', { value: (parsed as any).query, writable: true });
+      Object.defineProperty(req, 'params', { value: (parsed as any).params, writable: true });
 
       next();
     } catch (err: any) {

@@ -10,7 +10,7 @@ if (!moduleName) {
 
 const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
 const Module = capitalize(moduleName);
-const lowerModule = moduleName.toLowerCase();
+const lowerModule = moduleName.charAt(0).toLowerCase() + moduleName.slice(1);
 
 // Base path
 const basePath = path.join(process.cwd(), "src", "modules", moduleName);
