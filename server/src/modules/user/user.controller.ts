@@ -26,3 +26,10 @@ export const deleteUser = asyncHandler(async (req, res) => {
   await userService.deleteUser(id as string);
   ApiResponse.sendSuccess(res, 200, "User deleted successfully");
 });
+
+export const updateUserStatus = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+  const result = await userService.updateUserStatus(id as string, status);
+  ApiResponse.sendSuccess(res, 200, "User status updated successfully", result);
+});

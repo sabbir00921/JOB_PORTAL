@@ -1,7 +1,7 @@
 import { prisma } from "../../database/prisma";
 import CustomError from "../../helpers/CustomError";
 import { paginationHelper } from "../../utils/pagination";
-import { CreateUserPayload, UpdateUserPayload } from "./user.validation";
+import { CreateUserPayload, UpdateUserPayload } from "./user.interface";
 import { userRepository  } from "./user.repository";
 
 export const userService = {
@@ -61,6 +61,16 @@ export const userService = {
 
     return prisma.user.delete({
       where: { id },
+    });
+  },
+
+  async updateUserStatus(id: string, status: any) {
+    const item = await prisma.user.findUnique({ where: { id } });
+    if (!item) throw new CustomError(404, "User not found");
+
+    return prisma.user.update({
+      where: { id },
+      data: { status },
     });
   },
 };

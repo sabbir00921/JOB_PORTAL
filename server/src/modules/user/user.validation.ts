@@ -2,15 +2,31 @@ import { z } from "zod";
 
 export const createUserSchema = z.object({
   body: z.object({
-    // TODO: Add validation
+    firstName: z.string(),
+    lastName: z.string(),
+    email: z.string().email("Invalid email format"),
+    phone: z.string(),
+    password: z.string().min(6, "Password must be at least 6 characters long"),
+    role: z.enum(["admin", "jobSeeker", "recruiter"]).optional(),
   }),
 });
 
 export const updateUserSchema = z.object({
   body: z.object({
-    // TODO: Add validation
+    firstName: z.string().optional(),
+    lastName: z.string().optional(),
+    email: z.string().email("Invalid email format").optional(),
+    phone: z.string().optional(),
+    role: z.enum(["admin", "jobSeeker", "recruiter"]).optional(),
+    isVerified: z.boolean().optional(),
+    image: z.any().optional(),
   }),
 });
 
-export type CreateUserPayload = z.infer<typeof createUserSchema>["body"];
-export type UpdateUserPayload = z.infer<typeof updateUserSchema>["body"];
+export const updateUserStatusSchema = z.object({
+  body: z.object({
+    status: z.enum(["active", "inactive", "suspended", "banned", "flagged"], {
+      message: "Status must be one of active, inactive, suspended, banned, flagged",
+    }),
+  }),
+});
