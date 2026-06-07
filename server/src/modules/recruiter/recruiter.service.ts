@@ -4,9 +4,21 @@ import { paginationHelper } from "../../utils/pagination";
 import { CreateRecruiterDetailsPayload, UpdateRecruiterPayload } from "./recruiter.validation";
 
 export const recruiterService = {
-  async createRecruiterDetails(payload: CreateRecruiterDetailsPayload) {
+  async createRecruiterDetails(payload: CreateRecruiterDetailsPayload,userId:string) {
+
+const recruiterExists= await prisma.recruiter.findUnique({
+  where:{userId}
+})
+
+if(recruiterExists){
+  throw new CustomError(400,"Recruiter details already exist")
+}
+    
     const result = await prisma.recruiter.create({
-      data: payload as any,
+      data: {
+        ...payload,
+        userId
+      }
     });
     return result;
   },

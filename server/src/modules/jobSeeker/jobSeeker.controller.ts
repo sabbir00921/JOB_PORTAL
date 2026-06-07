@@ -36,7 +36,11 @@ export const getSingleJobSeekerDetails = asyncHandler(async (req, res) => {
 
 export const updateJobSeekerDetails = asyncHandler(async (req, res) => {
   const { id } = req.params;
+  console.log(id, "wergyert");
+  
   const resume = req.file;
+
+  
   
   const result = await jobSeekerService.updateJobSeekerDetails(id as string, req.body, resume);
   ApiResponse.sendSuccess(res, 200, "JobSeeker updated successfully", result);

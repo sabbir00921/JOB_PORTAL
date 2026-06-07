@@ -1,9 +1,8 @@
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
+import jwt, { SignOptions } from "jsonwebtoken";
 import { prisma } from "../../database/prisma";
 import { User } from "@prisma/client";
 import config from "../../config";
-import CustomError from "../../helpers/CustomError";
 
 // Add specific helper functions here if needed
 export const authRepository = {
@@ -18,28 +17,31 @@ export const authRepository = {
   },
 
   // JWT Token Helpers
+
+  //generate access token
   createAccessToken(user: Pick<User, "id" | "email" | "role">): string {
     return jwt.sign(
       { userId: user.id, email: user.email, role: user.role },
       config.jwt.accessTokenSecret as string,
-      { expiresIn: config.jwt.accessTokenExpires as any }
+      { expiresIn: config.jwt.accessTokenExpires as SignOptions["expiresIn"] }
     );
   },
 
+  //generate refresh token
   createRefreshToken(user: Pick<User, "id" | "email" | "role">): string {
     return jwt.sign(
       { userId: user.id, email: user.email, role: user.role },
       config.jwt.refreshTokenSecret as string,
-      { expiresIn: config.jwt.refreshTokenExpires as any }
+      { expiresIn: config.jwt.refreshTokenExpires as SignOptions["expiresIn"] }
     );
   },
 
-  //create password reset token
+  //generate password reset token
   createPasswordResetToken(user: Pick<User, "id" | "email" | "role">): string {
     return jwt.sign(
       { userId: user.id, email: user.email, role: user.role },
       config.jwt.accessTokenSecret as string,
-      { expiresIn: config.jwt.accessTokenExpires as any }
+      { expiresIn: config.jwt.accessTokenExpires as SignOptions["expiresIn"] }
     );
   },
 
@@ -51,7 +53,7 @@ export const authRepository = {
 
   // Safe User
   safeUser(user: User) {
-    const { password, refreshToken,forgetPasswordOtp,forgetPasswordToken,forgetPasswordTokenExpiry, ...safe } = user;
+    const { password, refreshToken,forgetPasswordOtp,forgetPasswordOtpExpiry,forgetPasswordToken,forgetPasswordTokenExpiry, ...safe } = user;
     return safe;
   },
 

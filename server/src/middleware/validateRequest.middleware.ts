@@ -12,9 +12,9 @@ export const validateRequest = (schema: ZodSchema): RequestHandler => {
         params: req.params,
       });
 
-      req.body = (parsed as any).body;
-      Object.defineProperty(req, 'query', { value: (parsed as any).query, writable: true });
-      Object.defineProperty(req, 'params', { value: (parsed as any).params, writable: true });
+      if ((parsed as any).body !== undefined) req.body = (parsed as any).body;
+      if ((parsed as any).query !== undefined) Object.defineProperty(req, 'query', { value: (parsed as any).query, writable: true });
+      if ((parsed as any).params !== undefined) Object.defineProperty(req, 'params', { value: (parsed as any).params, writable: true });
 
       next();
     } catch (err: any) {

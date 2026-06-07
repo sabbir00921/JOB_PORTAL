@@ -2,7 +2,6 @@ import { z } from "zod";
 
 export const createRecruiterDetailsSchema = z.object({
   body: z.object({
-    userId: z.string().min(1, "User ID is required"),
     companyName: z.string().min(1, "Company Name is required"),
     companyLogo: z.any().optional(),
     companyDescription: z.string().optional(),

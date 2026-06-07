@@ -2,9 +2,14 @@ import { Request, Response } from "express";
 import { asyncHandler } from "../../utils/asyncHandler";
 import ApiResponse from "../../utils/apiResponse";
 import { recruiterService } from "./recruiter.service";
+import CustomError from "../../helpers/CustomError";
 
 export const createRecruiterDetails = asyncHandler(async (req, res) => {
-  const result = await recruiterService.createRecruiterDetails(req.body);
+  const { id: userId, role } = req.user as { id: string, role: string }
+  if(role !== "recruiter"){
+    throw new CustomError (403, "Unauthorized access!")
+  }
+  const result = await recruiterService.createRecruiterDetails(req.body,userId );
   ApiResponse.sendSuccess(res, 201, "Recruiter details added successfully", result);
 });
 

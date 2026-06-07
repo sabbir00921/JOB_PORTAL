@@ -112,12 +112,14 @@ enum ExperienceLevel {
 model Job {
   id String @id @default(uuid())
   recruiterId String
-  recruiter Recruiter @relation(fields: [recruiterId], references: [id], onDelete: Cascade)
+  recruiter Recruiter @relation(fields: [recruiterId], references: [userId], onDelete: Cascade)
   title String
   description String
   responsibilities String[]
   qualifications String[]
-  salary String?
+  salaryMin Int @default(0)
+  salaryMax Int @default(0)
+  currency  String @default("BDT")
   location String?
   jobType JobType @default(fullTime)
   experienceLevel ExperienceLevel @default(entryLevel)
