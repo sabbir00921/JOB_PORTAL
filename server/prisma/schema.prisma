@@ -40,6 +40,8 @@ model User {
   forgetPasswordOtpExpiry DateTime?
   forgetPasswordToken String?
   forgetPasswordTokenExpiry DateTime?
+  verificationOtp String?
+  verificationOtpExpiry DateTime?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   @@map("users")

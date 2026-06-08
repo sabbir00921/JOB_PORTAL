@@ -3,6 +3,9 @@ import CustomError from "../../helpers/CustomError";
 import { paginationHelper } from "../../utils/pagination";
 import { CreateUserPayload, UpdateUserPayload } from "./user.interface";
 import { userRepository  } from "./user.repository";
+import { mailer } from "../../helpers/nodeMailer";
+import { verifyAccountOtpTemplate } from "../../tempaletes/auth.templates";
+import { generateOTP } from "../../utils/otpGenerator";
 
 export const userService = {
   async createUser(payload: CreateUserPayload) {
@@ -72,5 +75,55 @@ export const userService = {
       where: { id },
       data: { status },
     });
+  },
+
+  async requestEmailVerification(id: string) {
+    const user = await prisma.user.findUnique({ where: { id } });
+    if (!user) throw new CustomError(404, "User not found");
+    if (user.isVerified) throw new CustomError(400, "User is already verified");
+
+    const otp = generateOTP();
+    const expiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+    await prisma.user.update({
+      where: { id },
+      data: {
+        verificationOtp: otp,
+        verificationOtpExpiry: expiry,
+      },
+    });
+
+    await mailer({
+      subject: "Verify Your Account - OTP",
+      template: verifyAccountOtpTemplate(user.firstName, otp),
+      email: user.email,
+    });
+
+    return { message: "Verification OTP sent successfully" };
+  },
+
+  async verifyAccount(payload: { email: string, otp: string }) {
+    const { email, otp } = payload;
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) throw new CustomError(404, "User not found");
+    if (user.isVerified) throw new CustomError(400, "User is already verified");
+
+    if (user.verificationOtp !== otp) {
+      throw new CustomError(401, "Invalid OTP");
+    }
+    if (user.verificationOtpExpiry && user.verificationOtpExpiry < new Date()) {
+      throw new CustomError(401, "OTP expired");
+    }
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { 
+        isVerified: true,
+        verificationOtp: null,
+        verificationOtpExpiry: null,
+      },
+    });
+
+    return { message: "Account verified successfully" };
   },
 };

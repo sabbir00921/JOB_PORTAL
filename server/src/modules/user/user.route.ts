@@ -1,6 +1,6 @@
 import express from "express";
 import { validateRequest } from "../../middleware/validateRequest.middleware";
-import { createUserSchema, updateUserSchema, updateUserStatusSchema } from "./user.validation";
+import { createUserSchema, updateUserSchema, updateUserStatusSchema, verifyAccountSchema } from "./user.validation";
 import * as UserController from "./user.controller";
 import { authGuard, allowRole } from "../../middleware/auth.middleware";
 
@@ -38,6 +38,18 @@ router.delete(
   authGuard,
   allowRole("admin"),
   UserController.deleteUser,
+);
+
+router.post(
+  "/request-verification",
+  authGuard,
+  UserController.requestEmailVerification
+);
+
+router.post(
+  "/verify-account",
+  validateRequest(verifyAccountSchema),
+  UserController.verifyAccount
 );
 
 export default router;

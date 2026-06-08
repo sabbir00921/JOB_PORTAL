@@ -33,3 +33,17 @@ export const updateUserStatus = asyncHandler(async (req, res) => {
   const result = await userService.updateUserStatus(id as string, status);
   ApiResponse.sendSuccess(res, 200, "User status updated successfully", result);
 });
+
+export const requestEmailVerification = asyncHandler(async (req, res) => {
+  const userId = req.user?.id;
+  if (!userId) {
+    return ApiResponse.sendError(res, 401, "Unauthorized");
+  }
+  const result = await userService.requestEmailVerification(userId);
+  ApiResponse.sendSuccess(res, 200, "Verification email sent successfully", result);
+});
+
+export const verifyAccount = asyncHandler(async (req, res) => {
+  const result = await userService.verifyAccount(req.body);
+  ApiResponse.sendSuccess(res, 200, "Account verified successfully", result);
+});
